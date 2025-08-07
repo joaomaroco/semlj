@@ -262,29 +262,26 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         aSmartObj <- SmartTable$new(self$results$lavaanoptions, runner_machine)
         ladd(private$.smartObjs) <- aSmartObj
 
-        ## measurement invariance table ###
-        aSmartObj <- SmartTable$new(
-          self$results$measInvariance$measInvariance,
-          runner_machine
-        )
-        aSmartObj$activated <- self$options$outputMeasInv
-        aSmartObj$spaceBy <- "model" # Optional: visually separates models
-        ladd(private$.smartObjs) <- aSmartObj
-
         ## Ensure measurement invariance group and table exist
         if (is.null(self$results$measInvariance)) {
           self$results$measInvariance <- jmvcore::ResultsElement$new()
         }
-        if (is.null(self$results$measInvariance$measInvarianceTable)) {
-          self$results$measInvariance$measInvarianceTable <- jmvcore::ResultsElement$new()
-        }
+
+        ## Measurement invariance table ###
+        aSmartObj <- SmartTable$new(
+          self$results$measInvariance$measInvarianceTable,
+          runner_machine
+        )
+        aSmartObj$activated <- self$options$measInvariance
+        aSmartObj$spaceBy <- "model"
+        ladd(private$.smartObjs) <- aSmartObj
 
         ## Initialize SmartTable
         aSmartObj <- SmartTable$new(
           self$results$measInvariance$measInvarianceTable,
           runner_machine
         )
-        aSmartObj$activated <- self$options$outputMeasInv
+        aSmartObj$activated <- self$options$measInvariance
         aSmartObj$spaceBy <- "model"
         ladd(private$.smartObjs) <- aSmartObj
 
@@ -324,9 +321,19 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         private$.runner_machine$estimate(data)
 
         ### Run measurement invariance if requested
-        if (self$options$outputMeasInvariance) {
+        if (self$options$measInvariance) {
           inv_result <- private$.runner_machine$run_meas_invariance()
-          self$results$measInvariance$measInvarianceTable <- inv_result
+
+          # Ensure parent group exists
+          if (is.null(self$results$measInvariance)) {
+            self$results$measInvariance <- jmvcore::ResultsElement$new()
+          }
+          # Now safely assign data
+          if (!is.null(inv_result)) {
+            self$results$measInvariance$measInvarianceTable$setValues(
+              inv_result
+            )
+          }
         }
 
         ### save predicted if needed
