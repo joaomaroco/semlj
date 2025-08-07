@@ -264,7 +264,7 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
         ## measurement invariance table ###
         aSmartObj <- SmartTable$new(
-          self$results$meas.invariance$meas.invariance,
+          self$results$measInvariance$measInvariance,
           runner_machine
         )
         aSmartObj$activated <- self$options$outputMeasInv
@@ -309,7 +309,7 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         ### Run measurement invariance if requested
         if (self$options$outputMeasInv) {
           inv_result <- private$.runner_machine$run_meas_invariance()
-          self$results$meas.invariance$meas.invariance <- inv_result
+          self$results$measInvariance$measInvariance <- inv_result
         }
 
         ### save predicted if needed

@@ -1951,7 +1951,7 @@ items:
 
 
  # Measurment invariance ======================================================
-  - name: meas.invariance
+  - name: measInvariance
     title: "Measurement Invariance"
     type: Group
     clearWith:
@@ -1991,7 +1991,7 @@ items:
     
     visible: (outputMeasInv)
     items:
-      - name: meas.invariance
+      - name: measInvariance
         title: 'Measurement invariance'
         type: Table
         clearWith:
@@ -2027,7 +2027,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
-                    - meas.invariance
+                    - measInvariance
                       ### modeloptions  ends      
 #       variable number of rows
         columns:
@@ -2036,30 +2036,30 @@ items:
             type: text
             visible: (multigroup)
           - name: chi2
-            title: "χ²"
+            title: χ²
             type: number
           - name: df
-            title: "df"
+            title: df
             type: number
           - name: delta.chi2
-            title: "Δχ²"
+            title: Δχ²
             type: number
           - name: delta.df
-            title: "Δdf"
+            title: Δdf
             type: number
           - name: pvalue
             title: p
             type: number
-            format: pvalue
+            format: zto,pvalue
           - name: cfi
             title: CFI
             type: number
           - name: delta.cfi
-            title: "ΔCFI"
+            title: ΔCFI
             type: number
           - name: rmsea
             title: RMSEA
             type: number
           - name: delta.rmsea
-            title: "ΔRMSEA"
+            title: ΔRMSEA
             type: number

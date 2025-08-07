@@ -4,7 +4,7 @@ jus: '2.0'
 stage: 0
 compilerMode: tame
 events:
-  update: './gui.events::update'
+  update: ./gui.events::update
 children:
   - type: VariableSupplier
     persistentItems: true
@@ -23,8 +23,8 @@ children:
             height: large
             addButton: Add New Latent
             events:
-              listItemAdded: './gui.events::onChange_items_changed'
-              listItemRemoved: './gui.events::onChange_items_changed'
+              listItemAdded: ./gui.events::onChange_items_changed
+              listItemRemoved: ./gui.events::onChange_items_changed
             templateName: linreg-block-template
             template:
               type: LayoutBox
@@ -32,7 +32,7 @@ children:
               children:
                 - type: TextBox
                   events:
-                    change: './gui.events::onChange_latentName'
+                    change: ./gui.events::onChange_latentName
                   valueKey:
                     - label
                   borderless: true
@@ -43,8 +43,8 @@ children:
                   name: blocklist
                   valueFilter: unique
                   events:
-                    listItemAdded: './gui.events::onChange_items_changed'
-                    listItemRemoved: './gui.events::onChange_items_changed'
+                    listItemAdded: ./gui.events::onChange_items_changed
+                    listItemRemoved: ./gui.events::onChange_items_changed
                   valueKey:
                     - vars
                   isTarget: true
@@ -59,15 +59,15 @@ children:
             addButton: Add New Latent
             templateName: linreg-block-template
             events:
-              listItemAdded: './gui.events::onChange_items_changed'
-              listItemRemoved: './gui.events::onChange_items_changed'
+              listItemAdded: ./gui.events::onChange_items_changed
+              listItemRemoved: ./gui.events::onChange_items_changed
             template:
               type: LayoutBox
               margin: normal
               children:
                 - type: TextBox
                   events:
-                    change: './gui.events::onChange_latentName'
+                    change: ./gui.events::onChange_latentName
                   valueKey:
                     - label
                   borderless: true
@@ -77,8 +77,8 @@ children:
                 - type: VariablesListBox
                   valueFilter: unique
                   events:
-                    listItemAdded: './gui.events::onChange_items_changed'
-                    listItemRemoved: './gui.events::onChange_items_changed'
+                    listItemAdded: ./gui.events::onChange_items_changed
+                    listItemRemoved: ./gui.events::onChange_items_changed
                   valueKey:
                     - vars
                   name: blockList
@@ -114,8 +114,8 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              update: './gui.events::onUpdate_secondorderSupplier'
-              change: './gui.events::onChange_secondorderSupplier'
+              update: ./gui.events::onUpdate_secondorderSupplier
+              change: ./gui.events::onChange_secondorderSupplier
             children:
               - type: TargetLayoutBox
                 label: Second Order Factors
@@ -125,8 +125,8 @@ children:
                     height: large
                     addButton: Add New Latent
                     events:
-                      listItemAdded: './gui.events::onChange_items_changed'
-                      listItemRemoved: './gui.events::onChange_items_changed'
+                      listItemAdded: ./gui.events::onChange_items_changed
+                      listItemRemoved: ./gui.events::onChange_items_changed
                     templateName: linreg-block-template
                     template:
                       type: LayoutBox
@@ -134,7 +134,7 @@ children:
                       children:
                         - type: TextBox
                           events:
-                            change: './gui.events::onChange_SecondName'
+                            change: ./gui.events::onChange_SecondName
                           valueKey:
                             - label
                           borderless: true
@@ -144,9 +144,9 @@ children:
                         - type: VariablesListBox
                           valueFilter: unique
                           events:
-                            listItemAdded: './gui.events::onChange_items_changed'
-                            listItemRemoved: './gui.events::onChange_items_changed'
-                            change: './gui.events::onChange_secondorderTerms'
+                            listItemAdded: ./gui.events::onChange_items_changed
+                            listItemRemoved: ./gui.events::onChange_items_changed
+                            change: ./gui.events::onChange_secondorderTerms
                           valueKey:
                             - vars
                           name: blockList
@@ -169,8 +169,8 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              update: './gui.events::onUpdate_endogenousSupplier'
-              change: './gui.events::onChange_endogenousSupplier'
+              update: ./gui.events::onUpdate_endogenousSupplier
+              change: ./gui.events::onChange_endogenousSupplier
             children:
               - type: TargetLayoutBox
                 label: Endogenous Variables Models
@@ -199,7 +199,7 @@ children:
                           height: auto
                           ghostText: drag variables here
                           events:
-                            change: './gui.events::onChange_endogenousTerms'
+                            change: ./gui.events::onChange_endogenousTerms
                           template:
                             type: TermLabel
   - type: CollapseBox
@@ -218,8 +218,8 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              change: './gui.events::onChange_varcovSupplier'
-              update: './gui.events::onUpdate_varcovSupplier'
+              change: ./gui.events::onChange_varcovSupplier
+              update: ./gui.events::onUpdate_varcovSupplier
             children:
               - type: TargetLayoutBox
                 label: Select pairs
@@ -229,7 +229,7 @@ children:
                     fullRowSelect: true
                     isTarget: true
                     events:
-                      change: './gui.events::onChange_varcov'
+                      change: ./gui.events::onChange_varcov
                     columns:
                       - name: i1
                         stretchFactor: 1
@@ -270,7 +270,7 @@ children:
                   - type: ListBox
                     name: constraints
                     events:
-                      change: './gui.events::onChange_constraints'
+                      change: ./gui.events::onChange_constraints
                     height: large
                     addButton: Add directive
                     selectable: true
@@ -306,7 +306,7 @@ children:
                 name: estimator
               - type: ComboBox
                 name: likelihood
-                enable: '(estimator:ML || estimator:PML)'
+                enable: (estimator:ML || estimator:PML)
       - type: LayoutBox
         margin: large
         style: inline
@@ -371,30 +371,29 @@ children:
                 name: bootci_bootperc
                 optionName: bootci
                 optionPart: perc
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: RadioButton
                 name: bootci_bootnorm
                 optionName: bootci
                 optionPart: norm
-                enable: '(se:boot)'
+                enable: (se:boot)
               - name: bootci_bca.simple
                 type: RadioButton
                 optionName: bootci
                 optionPart: bca.simple
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: RadioButton
                 name: bootci_basic
                 optionName: bootci
                 optionPart: basic
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: TextBox
                 name: bootN
                 format: number
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: CheckBox
                 name: parallel
-                enable: '(se:boot)'
-                
+                enable: (se:boot)
           - type: LayoutBox
             margin: large
             style: list
@@ -414,7 +413,7 @@ children:
                       - type: TextBox
                         name: ci_width
                         format: number
-                        suffix: "%"
+                        suffix: '%'
                         enable: (est_ci || beta_ci)
               - type: Label
                 label: Constraints
@@ -513,6 +512,8 @@ children:
                     name: eq_lv.variances
                   - type: CheckBox
                     name: eq_lv.covariances
+                  - type: CheckBox
+                    name: measInvariance
   - type: CollapseBox
     label: Exploratory SEM options
     collapsed: true
@@ -529,8 +530,8 @@ children:
             persistentItems: false
             stretchFactor: 1
             events:
-              update: './gui.events::onEvent_nothing'
-              change: './gui.events::onEvent_nothing'
+              update: ./gui.events::onEvent_nothing
+              change: ./gui.events::onEvent_nothing
             children:
               - type: TargetLayoutBox
                 transferAction: none
@@ -542,7 +543,7 @@ children:
                     height: normal
                     addButton: Add factors block
                     events:
-                      change: './gui.events::onEvent_nothing'
+                      change: ./gui.events::onEvent_nothing
                     selectable: true
                     templateName: linreg-block-template
                     template:
@@ -583,15 +584,15 @@ children:
               - type: TextBox
                 name: geomin.epsilon
                 format: number
-                enable: '(rotation:geomin)'
+                enable: (rotation:geomin)
               - type: TextBox
                 name: orthomax.gamma
                 format: number
-                enable: '(rotation:orthomax)'
+                enable: (rotation:orthomax)
               - type: TextBox
                 name: oblimin.gamma
                 format: number
-                enable: '(rotation:oblimin)'
+                enable: (rotation:oblimin)
   - type: CollapseBox
     label: Output options
     name: output_options
@@ -613,13 +614,12 @@ children:
                   - type: Label
                     label: Information
                     children:
-                    - type: CheckBox
-                      name: showlabels
-                    - type: CheckBox
-                      name: constraints_examples
-                    - type: CheckBox
-                      name: lavaan_options
-                    
+                      - type: CheckBox
+                        name: showlabels
+                      - type: CheckBox
+                        name: constraints_examples
+                      - type: CheckBox
+                        name: lavaan_options
               - type: LayoutBox
                 margin: large
                 style: inline
@@ -642,7 +642,6 @@ children:
                             name: reliability
                           - type: CheckBox
                             name: htmt
-
                       - type: LayoutBox
                         margin: large
                         style: list

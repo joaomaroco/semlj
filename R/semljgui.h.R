@@ -51,6 +51,7 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             eq_regressions = FALSE,
             eq_lv.variances = FALSE,
             eq_lv.covariances = FALSE,
+            measInvariance = FALSE,
             esem_terms = list(
                 list()),
             rotation = "geomin",
@@ -357,6 +358,10 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "eq_lv.covariances",
                 eq_lv.covariances,
                 default=FALSE)
+            private$..measInvariance <- jmvcore::OptionBool$new(
+                "measInvariance",
+                measInvariance,
+                default=FALSE)
             private$..esem_terms <- jmvcore::OptionArray$new(
                 "esem_terms",
                 esem_terms,
@@ -610,6 +615,7 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..eq_regressions)
             self$.addOption(private$..eq_lv.variances)
             self$.addOption(private$..eq_lv.covariances)
+            self$.addOption(private$..measInvariance)
             self$.addOption(private$..esem_terms)
             self$.addOption(private$..rotation)
             self$.addOption(private$..algorithm)
@@ -690,6 +696,7 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         eq_regressions = function() private$..eq_regressions$value,
         eq_lv.variances = function() private$..eq_lv.variances$value,
         eq_lv.covariances = function() private$..eq_lv.covariances$value,
+        measInvariance = function() private$..measInvariance$value,
         esem_terms = function() private$..esem_terms$value,
         rotation = function() private$..rotation$value,
         algorithm = function() private$..algorithm$value,
@@ -769,6 +776,7 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..eq_regressions = NA,
         ..eq_lv.variances = NA,
         ..eq_lv.covariances = NA,
+        ..measInvariance = NA,
         ..esem_terms = NA,
         ..rotation = NA,
         ..algorithm = NA,
@@ -823,7 +831,8 @@ semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         preds_ov = function() private$.items[["preds_ov"]],
         preds_dv = function() private$.items[["preds_dv"]],
         synexamples = function() private$.items[["synexamples"]],
-        lavaanoptions = function() private$.items[["lavaanoptions"]]),
+        lavaanoptions = function() private$.items[["lavaanoptions"]],
+        measInvariance = function() private$.items[["measInvariance"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -2820,7 +2829,130 @@ semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value3", 
                         `type`="text", 
-                        `title`="Value"))))}))
+                        `title`="Value"))))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    measInvariance = function() private$.items[["measInvariance"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="measInvariance",
+                            title="Measurement Invariance",
+                            clearWith=list(
+                    "code",
+                    "estimator",
+                    "likelihood",
+                    "meanstructure",
+                    "int_ov",
+                    "int_lv",
+                    "std_lv",
+                    "std_ov",
+                    "cov_x",
+                    "cov_y",
+                    "cov_lv",
+                    "cluster",
+                    "multigroup",
+                    "eq_loadings",
+                    "eq_intercepts",
+                    "eq_residuals",
+                    "eq_residual.covariances",
+                    "eq_means",
+                    "eq_thresholds",
+                    "eq_regressions",
+                    "eq_lv.variances",
+                    "eq_lv.covariances",
+                    "esem_terms",
+                    "rotation",
+                    "algorithm",
+                    "orthogonal",
+                    "efa_std.ov",
+                    "geomin.epsilon",
+                    "orthomax.gamma",
+                    "oblimin.gamma",
+                    "missing"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="measInvariance",
+                            title="Measurement invariance",
+                            clearWith=list(
+                                "code",
+                                "estimator",
+                                "likelihood",
+                                "meanstructure",
+                                "int_ov",
+                                "int_lv",
+                                "std_lv",
+                                "std_ov",
+                                "cov_x",
+                                "cov_y",
+                                "cov_lv",
+                                "cluster",
+                                "multigroup",
+                                "eq_loadings",
+                                "eq_intercepts",
+                                "eq_residuals",
+                                "eq_residual.covariances",
+                                "eq_means",
+                                "eq_thresholds",
+                                "eq_regressions",
+                                "eq_lv.variances",
+                                "eq_lv.covariances",
+                                "esem_terms",
+                                "rotation",
+                                "algorithm",
+                                "orthogonal",
+                                "efa_std.ov",
+                                "geomin.epsilon",
+                                "orthomax.gamma",
+                                "oblimin.gamma",
+                                "missing",
+                                "measInvariance"),
+                            columns=list(
+                                list(
+                                    `name`="model", 
+                                    `title`="Model", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)"),
+                                list(
+                                    `name`="chi2", 
+                                    `title`="\u03C7\u00B2", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="number"),
+                                list(
+                                    `name`="delta.chi2", 
+                                    `title`="\u0394\u03C7\u00B2", 
+                                    `type`="number"),
+                                list(
+                                    `name`="delta.df", 
+                                    `title`="\u0394df", 
+                                    `type`="number"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="cfi", 
+                                    `title`="CFI", 
+                                    `type`="number"),
+                                list(
+                                    `name`="delta.cfi", 
+                                    `title`="\u0394CFI", 
+                                    `type`="number"),
+                                list(
+                                    `name`="rmsea", 
+                                    `title`="RMSEA", 
+                                    `type`="number"),
+                                list(
+                                    `name`="delta.rmsea", 
+                                    `title`="\u0394RMSEA", 
+                                    `type`="number"))))}))$new(options=options))}))
 
 semljguiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "semljguiBase",
@@ -2972,6 +3104,8 @@ semljguiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param eq_lv.covariances \code{TRUE} or \code{FALSE} (default), constrain
 #'   the (residual) covariances of the latent variables to be equal across
 #'   groups (when conducting multi-group analyses)
+#' @param measInvariance Test for measurement invariance across groups
+#'   (configural, metric, scalar, strict)
 #' @param esem_terms A list of list containing blocks of factors to be
 #'   factorialized toghether.
 #' @param rotation Rotation methods as implemented in lavaan >0.6-13
@@ -3075,6 +3209,7 @@ semljguiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$preds_dv} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$synexamples} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lavaanoptions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$measInvariance$measInvariance} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -3131,6 +3266,7 @@ semljgui <- function(
     eq_regressions = FALSE,
     eq_lv.variances = FALSE,
     eq_lv.covariances = FALSE,
+    measInvariance = FALSE,
     esem_terms = list(
                 list()),
     rotation = "geomin",
@@ -3221,6 +3357,7 @@ semljgui <- function(
         eq_regressions = eq_regressions,
         eq_lv.variances = eq_lv.variances,
         eq_lv.covariances = eq_lv.covariances,
+        measInvariance = measInvariance,
         esem_terms = esem_terms,
         rotation = rotation,
         algorithm = algorithm,
