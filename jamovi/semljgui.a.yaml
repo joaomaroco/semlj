@@ -610,7 +610,7 @@ options:
 
     
     #   For the GUI-version, the GUI-element multigroup is part of the inter-
-    #   face to elect variables
+    #   face to select variables
 
     - name: eq_loadings
       type: Bool
@@ -693,7 +693,15 @@ options:
             constrain the (residual) covariances of the latent variables to be equal across groups (when conducting multi-group analyses)
           R: >
             `TRUE` or `FALSE` (default), constrain the (residual) covariances of the latent variables to be equal across groups (when conducting multi-group analyses)
-
+    - name: measInvariance
+      type: Bool
+      title: "Measurement invariance"
+      default: false
+      description:
+          ui: >
+            Test for measurement invariance across groups (configural, metric, scalar, strict)
+          R: >
+            Test for measurement invariance across groups (configural, metric, scalar, strict)
 
 #### Exploratory ESEM options ==============================================
 

@@ -1948,3 +1948,118 @@ items:
       - name: value3
         type: text
         title: Value
+
+
+ # Measurment invariance ======================================================
+  - name: meas.invariance
+    title: "Measurement Invariance"
+    type: Group
+    clearWith:
+                      ### modeloptions  begins
+                    - code
+                    - estimator
+                    - likelihood
+                    - meanstructure
+                    - int_ov
+                    - int_lv
+                    - std_lv
+                    - std_ov
+                    - cov_x
+                    - cov_y
+                    - cov_lv
+                    - cluster
+                    - multigroup
+                    - eq_loadings
+                    - eq_intercepts
+                    - eq_residuals
+                    - eq_residual.covariances
+                    - eq_means
+                    - eq_thresholds
+                    - eq_regressions
+                    - eq_lv.variances
+                    - eq_lv.covariances
+                    - esem_terms
+                    - rotation
+                    - algorithm
+                    - orthogonal
+                    - efa_std.ov
+                    - geomin.epsilon
+                    - orthomax.gamma
+                    - oblimin.gamma
+                    - missing
+                      ### modeloptions  ends
+    
+    visible: (outputMeasInv)
+    items:
+      - name: meas.invariance
+        title: 'Measurement invariance'
+        type: Table
+        clearWith:
+                      ### modeloptions  begins
+                    - code
+                    - estimator
+                    - likelihood
+                    - meanstructure
+                    - int_ov
+                    - int_lv
+                    - std_lv
+                    - std_ov
+                    - cov_x
+                    - cov_y
+                    - cov_lv
+                    - cluster
+                    - multigroup
+                    - eq_loadings
+                    - eq_intercepts
+                    - eq_residuals
+                    - eq_residual.covariances
+                    - eq_means
+                    - eq_thresholds
+                    - eq_regressions
+                    - eq_lv.variances
+                    - eq_lv.covariances
+                    - esem_terms
+                    - rotation
+                    - algorithm
+                    - orthogonal
+                    - efa_std.ov
+                    - geomin.epsilon
+                    - orthomax.gamma
+                    - oblimin.gamma
+                    - missing
+                    - meas.invariance
+                      ### modeloptions  ends      
+#       variable number of rows
+        columns:
+          - name:  model
+            title: Model
+            type: text
+            visible: (multigroup)
+          - name: chi2
+            title: "χ²"
+            type: number
+          - name: df
+            title: "df"
+            type: number
+          - name: delta.chi2
+            title: "Δχ²"
+            type: number
+          - name: delta.df
+            title: "Δdf"
+            type: number
+          - name: pvalue
+            title: p
+            type: number
+            format: pvalue
+          - name: cfi
+            title: CFI
+            type: number
+          - name: delta.cfi
+            title: "ΔCFI"
+            type: number
+          - name: rmsea
+            title: RMSEA
+            type: number
+          - name: delta.rmsea
+            title: "ΔRMSEA"
+            type: number
