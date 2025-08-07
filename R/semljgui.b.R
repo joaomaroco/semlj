@@ -321,9 +321,7 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
           }
           # Now safely assign data
           if (!is.null(inv_result)) {
-            self$results$measInvariance$measInvarianceTable$setValues(
-              inv_result
-            )
+            self$results$measInvariance$measInvarianceTable$inv_result
           }
         }
 

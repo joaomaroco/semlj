@@ -678,7 +678,7 @@ Runner <- R6::R6Class(
       }
 
       data <- private$.get_data()
-      group_var <- self$multigroup$var
+      group_var <- as.numeric(self$multigroup$var)
       model_syntax <- self$user_syntax
       estimator <- self$options$estimator
       likelihood <- self$options$likelihood
@@ -934,6 +934,7 @@ Runner <- R6::R6Class(
       jinfo(str(invdf))
       jinfo(head(invdf))
 
+      cat(invdf)
       return(invdf)
     },
 
