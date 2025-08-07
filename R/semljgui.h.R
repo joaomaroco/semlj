@@ -51,7 +51,6 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             eq_regressions = FALSE,
             eq_lv.variances = FALSE,
             eq_lv.covariances = FALSE,
-            measInvariance = FALSE,
             esem_terms = list(
                 list()),
             rotation = "geomin",
@@ -86,7 +85,8 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_labsize = "medium",
             diag_shape_man = "rectangle",
             diag_shape_lat = "circle",
-            diag_abbrev = "5", ...) {
+            diag_abbrev = "5",
+            measInvariance = FALSE, ...) {
 
             super$initialize(
                 package="semlj",
@@ -358,10 +358,6 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "eq_lv.covariances",
                 eq_lv.covariances,
                 default=FALSE)
-            private$..measInvariance <- jmvcore::OptionBool$new(
-                "measInvariance",
-                measInvariance,
-                default=FALSE)
             private$..esem_terms <- jmvcore::OptionArray$new(
                 "esem_terms",
                 esem_terms,
@@ -573,6 +569,10 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "preds_ov")
             private$..preds_dv <- jmvcore::OptionOutput$new(
                 "preds_dv")
+            private$..measInvariance <- jmvcore::OptionBool$new(
+                "measInvariance",
+                measInvariance,
+                default=FALSE)
 
             self$.addOption(private$...caller)
             self$.addOption(private$..code)
@@ -615,7 +615,6 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..eq_regressions)
             self$.addOption(private$..eq_lv.variances)
             self$.addOption(private$..eq_lv.covariances)
-            self$.addOption(private$..measInvariance)
             self$.addOption(private$..esem_terms)
             self$.addOption(private$..rotation)
             self$.addOption(private$..algorithm)
@@ -653,6 +652,7 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..preds_lv)
             self$.addOption(private$..preds_ov)
             self$.addOption(private$..preds_dv)
+            self$.addOption(private$..measInvariance)
         }),
     active = list(
         .caller = function() private$...caller$value,
@@ -696,7 +696,6 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         eq_regressions = function() private$..eq_regressions$value,
         eq_lv.variances = function() private$..eq_lv.variances$value,
         eq_lv.covariances = function() private$..eq_lv.covariances$value,
-        measInvariance = function() private$..measInvariance$value,
         esem_terms = function() private$..esem_terms$value,
         rotation = function() private$..rotation$value,
         algorithm = function() private$..algorithm$value,
@@ -733,7 +732,8 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diag_abbrev = function() private$..diag_abbrev$value,
         preds_lv = function() private$..preds_lv$value,
         preds_ov = function() private$..preds_ov$value,
-        preds_dv = function() private$..preds_dv$value),
+        preds_dv = function() private$..preds_dv$value,
+        measInvariance = function() private$..measInvariance$value),
     private = list(
         ...caller = NA,
         ..code = NA,
@@ -776,7 +776,6 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..eq_regressions = NA,
         ..eq_lv.variances = NA,
         ..eq_lv.covariances = NA,
-        ..measInvariance = NA,
         ..esem_terms = NA,
         ..rotation = NA,
         ..algorithm = NA,
@@ -813,7 +812,8 @@ semljguiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diag_abbrev = NA,
         ..preds_lv = NA,
         ..preds_ov = NA,
-        ..preds_dv = NA)
+        ..preds_dv = NA,
+        ..measInvariance = NA)
 )
 
 semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -2877,6 +2877,7 @@ semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="measInvarianceTable",
                             title="Measurement invariance",
+                            visible="(measInvariance)",
                             clearWith=list(
                                 "code",
                                 "estimator",
@@ -2915,7 +2916,7 @@ semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="model", 
                                     `title`="Model", 
                                     `type`="text", 
-                                    `visible`="(multigroup)"),
+                                    `visible`=TRUE),
                                 list(
                                     `name`="chi2", 
                                     `title`="\u03C7\u00B2", 
@@ -3104,8 +3105,6 @@ semljguiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param eq_lv.covariances \code{TRUE} or \code{FALSE} (default), constrain
 #'   the (residual) covariances of the latent variables to be equal across
 #'   groups (when conducting multi-group analyses)
-#' @param measInvariance Test for measurement invariance across groups
-#'   (configural, metric, scalar, strict)
 #' @param esem_terms A list of list containing blocks of factors to be
 #'   factorialized toghether.
 #' @param rotation Rotation methods as implemented in lavaan >0.6-13
@@ -3176,6 +3175,8 @@ semljguiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   "circle").
 #' @param diag_abbrev Choose the length (characters) of the variable name
 #'   abbreviations (default: 5).
+#' @param measInvariance Test for measurement invariance across groups
+#'   (configural, metric, scalar, strict)
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$info} \tab \tab \tab \tab \tab a table \cr
@@ -3266,7 +3267,6 @@ semljgui <- function(
     eq_regressions = FALSE,
     eq_lv.variances = FALSE,
     eq_lv.covariances = FALSE,
-    measInvariance = FALSE,
     esem_terms = list(
                 list()),
     rotation = "geomin",
@@ -3301,7 +3301,8 @@ semljgui <- function(
     diag_labsize = "medium",
     diag_shape_man = "rectangle",
     diag_shape_lat = "circle",
-    diag_abbrev = "5") {
+    diag_abbrev = "5",
+    measInvariance = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("semljgui requires jmvcore to be installed (restart may be required)")
@@ -3357,7 +3358,6 @@ semljgui <- function(
         eq_regressions = eq_regressions,
         eq_lv.variances = eq_lv.variances,
         eq_lv.covariances = eq_lv.covariances,
-        measInvariance = measInvariance,
         esem_terms = esem_terms,
         rotation = rotation,
         algorithm = algorithm,
@@ -3391,7 +3391,8 @@ semljgui <- function(
         diag_labsize = diag_labsize,
         diag_shape_man = diag_shape_man,
         diag_shape_lat = diag_shape_lat,
-        diag_abbrev = diag_abbrev)
+        diag_abbrev = diag_abbrev,
+        measInvariance = measInvariance)
 
     analysis <- semljguiClass$new(
         options = options,

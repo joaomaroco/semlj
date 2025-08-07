@@ -1953,7 +1953,8 @@ items:
  # Measurment invariance ======================================================
   - name: measInvariance
     title: "Measurement Invariance"
-    type: Group
+    type: Group   
+    visible: (measInvariance)
     clearWith:
                       ### modeloptions  begins
                     - code
@@ -1988,12 +1989,11 @@ items:
                     - oblimin.gamma
                     - missing
                       ### modeloptions  ends
-    
-    visible: (outputMeasInv)
     items:
       - name: measInvarianceTable
         title: 'Measurement invariance'
         type: Table
+        visible: (measInvariance)
         clearWith:
                       ### modeloptions  begins
                     - code
@@ -2034,7 +2034,7 @@ items:
           - name:  model
             title: Model
             type: text
-            visible: (multigroup)
+            visible: true
           - name: chi2
             title: χ²
             type: number

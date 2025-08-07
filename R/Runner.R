@@ -899,7 +899,10 @@ Runner <- R6::R6Class(
         "Measurement Invariance Analysis for",
         group_var
       )
-
+      # debbuging
+      jinfo("Measurement invariance results:")
+      jinfo(str(invdf))
+      jinfo(head(invdf))
       return(invdf)
     },
 
