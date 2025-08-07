@@ -2833,7 +2833,7 @@ semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    measInvariance = function() private$.items[["measInvariance"]]),
+                    measInvarianceTable = function() private$.items[["measInvarianceTable"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -2875,7 +2875,7 @@ semljguiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "missing"))
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="measInvariance",
+                            name="measInvarianceTable",
                             title="Measurement invariance",
                             clearWith=list(
                                 "code",
@@ -3209,7 +3209,7 @@ semljguiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$preds_dv} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$synexamples} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lavaanoptions} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$measInvariance$measInvariance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$measInvariance$measInvarianceTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

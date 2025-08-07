@@ -660,7 +660,7 @@ Runner <- R6::R6Class(
         !is.something(self$multigroup) || !is.character(self$multigroup$var)
       ) {
         self$warning <- list(
-          topic = "meas_invariance",
+          topic = "measInvariance",
           message = "Grouping variable not specified. Use GROUP = <variable>; in syntax."
         )
         return(NULL)

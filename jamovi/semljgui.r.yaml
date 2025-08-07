@@ -1991,7 +1991,7 @@ items:
     
     visible: (outputMeasInv)
     items:
-      - name: measInvariance
+      - name: measInvarianceTable
         title: 'Measurement invariance'
         type: Table
         clearWith:
