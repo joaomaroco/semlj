@@ -655,28 +655,50 @@ Runner <- R6::R6Class(
     ## Measurment Invariance Analysis : tryout by Joao Maroco :-(
 
     run_meas_invariance = function() {
-      # Check if multigroup is defined
-      if (
-        !is.something(self$multigroup) || !is.character(self$multigroup$var)
-      ) {
-        self$warning <- list(
-          topic = "measInvariance",
-          message = "Grouping variable not specified. Use GROUP = <variable>; in syntax."
+      jinfo("Starting measurement invariance analysis...")
+
+      # Check if multigroup is enabled
+      multigroup_enabled <- isTRUE(self$options$multigroup)
+
+      # Check if a group variable is selected
+      group_selected <- !is.null(self$multigroup) &&
+        !is.null(self$multigroup$var) &&
+        is.character(self$multigroup$var) &&
+        nzchar(trimws(self$multigroup$var))
+
+      if (!multigroup_enabled || !group_selected) {
+        jinfo(
+          "Measurement invariance skipped: multigroup_enabled=",
+          multigroup_enabled,
+          " group_selected=",
+          group_selected
         )
         return(NULL)
       }
 
+      data <- private$.get_data()
       group_var <- self$multigroup$var
       model_syntax <- self$user_syntax
-      data <- lavaan::lavInspect(self$model, "data")
-
-      # Estimator: default to "MLR" if not set or empty
       estimator <- self$options$estimator
-      if (is.null(estimator) || !nzchar(estimator)) {
-        estimator <- "MLR"
-      }
+      likelihood <- self$options$likelihood
 
-      # Configural model (no equality constraints)
+      # Check group variable has at least 2 valid levels
+      group_vals <- data[[group_var]]
+      levels <- unique(na.omit(group_vals))
+      if (length(levels) < 2) {
+        self$warning <- list(
+          topic = "meas_invariance",
+          message = "Grouping variable has fewer than 2 valid levels — cannot fit multi-group models."
+        )
+        return(NULL)
+      }
+      jinfo("Group variable: ", group_var, " (", length(levels), " levels)")
+
+      # List to store successfully fitted models
+      models_list <- list()
+      labels <- character()
+
+      # === 1. Configural Model (no constraints) ===
       jinfo("Fitting configural model...")
       config_res <- try_hard({
         lavaan::sem(
@@ -686,22 +708,30 @@ Runner <- R6::R6Class(
           estimator = estimator,
           std.lv = TRUE,
           missing = self$options$missing,
-          likelihood = self$options$likelihood
+          likelihood = likelihood
         )
       })
-      if (
-        isFALSE(config_res$obj) ||
-          !lavaan::fitMeasures(config_res$obj, "converged")
-      ) {
+
+      if (is.null(config_res$obj) || isFALSE(config_res$obj)) {
         self$warning <- list(
           topic = "meas_invariance",
-          message = "Configural model failed to fit."
+          message = "Configural model could not be estimated."
         )
         return(NULL)
       }
-      Config <- config_res$obj
 
-      # Metric invariance (equal loadings)
+      if (!lavaan::fitMeasures(config_res$obj, "converged")) {
+        self$warning <- list(
+          topic = "meas_invariance",
+          message = "Configural model failed to converge."
+        )
+        return(NULL)
+      }
+
+      models_list$Configural <- config_res$obj
+      labels <- c(labels, "Configural")
+
+      # === 2. Metric Invariance (equal loadings) ===
       jinfo("Fitting metric invariance model...")
       metric_res <- try_hard({
         lavaan::sem(
@@ -712,22 +742,22 @@ Runner <- R6::R6Class(
           std.lv = TRUE,
           group.equal = c("loadings"),
           missing = self$options$missing,
-          likelihood = self$options$likelihood
+          likelihood = likelihood
         )
       })
-      if (
-        isFALSE(metric_res$obj) ||
-          !lavaan::fitMeasures(metric_res$obj, "converged")
-      ) {
-        self$warning <- list(
-          topic = "meas_invariance",
-          message = "Metric model failed to fit."
-        )
-        return(NULL)
-      }
-      Metric <- metric_res$obj
 
-      # Scalar invariance (equal loadings + intercepts)
+      if (
+        !is.null(metric_res$obj) &&
+          !isFALSE(metric_res$obj) &&
+          lavaan::fitMeasures(metric_res$obj, "converged")
+      ) {
+        models_list$Metric <- metric_res$obj
+        labels <- c(labels, "Metric")
+      } else {
+        jinfo("Metric model failed to converge — omitting from comparison")
+      }
+
+      # === 3. Scalar Invariance (equal intercepts) ===
       jinfo("Fitting scalar invariance model...")
       scalar_res <- try_hard({
         lavaan::sem(
@@ -738,50 +768,51 @@ Runner <- R6::R6Class(
           std.lv = TRUE,
           group.equal = c("loadings", "intercepts"),
           missing = self$options$missing,
-          likelihood = self$options$likelihood
-        )
-      })
-      if (
-        isFALSE(scalar_res$obj) ||
-          !lavaan::fitMeasures(scalar_res$obj, "converged")
-      ) {
-        self$warning <- list(
-          topic = "meas_invariance",
-          message = "Scalar model failed to fit."
-        )
-        return(NULL)
-      }
-      Scalar <- scalar_res$obj
-
-      # Means invariance (equal latent means)
-      jinfo("Fitting latent means invariance model...")
-      means_res <- try_hard({
-        lavaan::sem(
-          model = model_syntax,
-          data = data,
-          group = group_var,
-          estimator = estimator,
-          std.lv = TRUE,
-          group.equal = c("loadings", "intercepts", "means"),
-          missing = self$options$missing,
-          likelihood = self$options$likelihood
+          likelihood = likelihood
         )
       })
 
       if (
-        isFALSE(means_res$obj) ||
-          !lavaan::fitMeasures(means_res$obj, "converged")
+        !is.null(scalar_res$obj) &&
+          !isFALSE(scalar_res$obj) &&
+          lavaan::fitMeasures(scalar_res$obj, "converged")
       ) {
-        self$warning <- list(
-          topic = "meas_invariance",
-          message = "Means model failed to fit — omitting from comparison."
-        )
-        models_list <- list(Config, Metric, Scalar)
-        labels <- c("Configural", "Metric", "Scalar")
+        models_list$Scalar <- scalar_res$obj
+        labels <- c(labels, "Scalar")
       } else {
-        Means <- means_res$obj
+        jinfo("Scalar model failed to converge — omitting from comparison")
+      }
 
-        # Regressions invariance (equal structural paths)
+      # === 4. Means Invariance (equal latent means) ===
+      if (self$options$eq_means) {
+        jinfo("Fitting latent means invariance model...")
+        means_res <- try_hard({
+          lavaan::sem(
+            model = model_syntax,
+            data = data,
+            group = group_var,
+            estimator = estimator,
+            std.lv = TRUE,
+            group.equal = c("loadings", "intercepts", "means"),
+            missing = self$options$missing,
+            likelihood = likelihood
+          )
+        })
+
+        if (
+          !is.null(means_res$obj) &&
+            !isFALSE(means_res$obj) &&
+            lavaan::fitMeasures(means_res$obj, "converged")
+        ) {
+          models_list$Means <- means_res$obj
+          labels <- c(labels, "Means")
+        } else {
+          jinfo("Means model failed to converge — omitting from comparison")
+        }
+      }
+
+      # === 5. Regressions Invariance (equal structural paths) ===
+      if (self$options$eq_regressions && grepl("~", model_syntax)) {
         jinfo("Fitting regression invariance model...")
         reg_res <- try_hard({
           lavaan::sem(
@@ -792,117 +823,116 @@ Runner <- R6::R6Class(
             std.lv = TRUE,
             group.equal = c("loadings", "intercepts", "regressions"),
             missing = self$options$missing,
-            likelihood = self$options$likelihood
+            likelihood = likelihood
           )
         })
+
         if (
-          isFALSE(reg_res$obj) || !lavaan::fitMeasures(reg_res$obj, "converged")
+          !is.null(reg_res$obj) &&
+            !isFALSE(reg_res$obj) &&
+            lavaan::fitMeasures(reg_res$obj, "converged")
         ) {
-          self$warning <- list(
-            topic = "meas_invariance",
-            message = "Regressions model failed to fit — omitting."
-          )
-          models_list <- list(Config, Metric, Scalar, Means)
-          labels <- c("Configural", "Metric", "Scalar", "Means")
+          models_list$Regressions <- reg_res$obj
+          labels <- c(labels, "Regressions")
         } else {
-          Regressions <- reg_res$obj
-          models_list <- list(Config, Metric, Scalar, Means, Regressions)
-          labels <- c("Configural", "Metric", "Scalar", "Means", "Regressions")
+          jinfo(
+            "Regressions model failed to converge — omitting from comparison"
+          )
         }
       }
 
-      # Likelihood ratio tests (Chi² difference tests)
+      # If no models beyond Configural, warn and return NULL
+      if (length(models_list) == 1) {
+        self$warning <- list(
+          topic = "meas_invariance",
+          message = "Only configural model converged — no invariance tests possible."
+        )
+        return(NULL)
+      }
+
+      # === 6. Likelihood Ratio Tests (Chi² Diff) ===
       jinfo("Running nested model comparisons...")
       lrt_call <- try_hard(do.call(lavaan::lavTestLRT, models_list))
       if (isFALSE(lrt_call$obj)) {
         self$warning <- list(
           topic = "meas_invariance",
-          message = "Likelihood ratio test failed."
+          message = "Likelihood ratio test failed — using individual fit measures only."
         )
-        return(NULL)
+        # Fallback: compute only fit measures
+        Tab <- NULL
+      } else {
+        Tab <- lrt_call$obj
+        Tab <- Tab[, c("df", "chisq", "chisq diff", "df diff", "pvalue")]
+        colnames(Tab) <- c("df", "chisq", "delta.chi2", "delta.df", "pvalue")
       }
-      Tab <- lrt_call$obj
-      Tab <- Tab[, c(
-        "df",
-        "aic",
-        "bic",
-        "chisq",
-        "chisq diff",
-        "df diff",
-        "pvalue"
-      )]
-      # Rename for clarity
-      colnames(Tab) <- c(
-        "df",
-        "AIC",
-        "BIC",
-        "chisq",
-        "chisq diff",
-        "df diff",
-        "P[Chisq.diff >]"
-      )
 
-      # Extract fit measures: CFI and RMSEA
+      # === 7. Extract Fit Measures: CFI, RMSEA ===
       get_fit <- function(model, measures) {
         if (is.null(model)) {
-          return(c(NA, NA))
+          return(NA)
         }
-        tryCatch(lavaan::fitMeasures(model, measures), error = function(e) {
-          c(NA, NA)
-        })
+        tryCatch(lavaan::fitMeasures(model, measures), error = function(e) NA)
       }
 
-      fc <- get_fit(Config, c("cfi", "rmsea"))
-      fm <- get_fit(Metric, c("cfi", "rmsea"))
-      fs <- get_fit(Scalar, c("cfi", "rmsea"))
-      fstr <- get_fit(if (exists("Means")) Means else NULL, c("cfi", "rmsea"))
-      freg <- get_fit(
-        if (exists("Regressions")) Regressions else NULL,
-        c("cfi", "rmsea")
-      )
+      cfi_vals <- sapply(models_list, function(m) get_fit(m, "cfi"))
+      rmsea_vals <- sapply(models_list, function(m) get_fit(m, "rmsea"))
 
-      # Compute ΔCFI and ΔRMSEA
-      invdf$`ΔCFI` <- c(0, diff(invdf$CFI))
-      invdf$`ΔRMSEA` <- c(0, diff(invdf$RMSEA))
-
-      # Build final data frame
+      # === 8. Build Final Data Frame ===
       invdf <- data.frame(
         model = labels,
-        chi2 = Tab$chisq,
-        df = Tab$df,
-        delta.chi2 = Tab$`chisq diff`,
-        delta.df = Tab$`df diff`,
-        pvalue = Tab$`P[Chisq.diff >]`,
-        cfi = c(fc[1], fm[1], fs[1], fstr[1], freg[1]),
-        delta.cfi = c(NA, diff(c(fc[1], fm[1], fs[1], fstr[1], freg[1]))),
-        rmsea = c(fc[2], fm[2], fs[2], fstr[2], freg[2]),
-        delta.rmsea = c(NA, diff(c(fc[2], fm[2], fs[2], fstr[2], freg[2])))
+        chi2 = sapply(models_list, function(m) get_fit(m, "chisq")),
+        df = sapply(models_list, function(m) get_fit(m, "df")),
+        delta.chi2 = if (is.null(Tab)) {
+          c(NA, diff(sapply(models_list, function(m) get_fit(m, "chisq"))))
+        } else {
+          Tab$delta.chi2
+        },
+        delta.df = if (is.null(Tab)) {
+          c(NA, diff(sapply(models_list, function(m) get_fit(m, "df"))))
+        } else {
+          Tab$delta.df
+        },
+        pvalue = if (is.null(Tab)) {
+          pvals <- c(NA)
+          for (i in 2:length(models_list)) {
+            chi2_diff <- invdf[i, "delta.chi2"]
+            df_diff <- invdf[i, "delta.df"]
+            pvals[i] <- pchisq(chi2_diff, df_diff, lower.tail = FALSE)
+          }
+          pvals
+        } else {
+          Tab$pvalue
+        },
+        cfi = cfi_vals,
+        delta.cfi = c(0, diff(cfi_vals)),
+        rmsea = rmsea_vals,
+        delta.rmsea = c(0, diff(rmsea_vals)),
+        stringsAsFactors = FALSE
       )
 
-      # Round values for presentation
+      # Round values
       invdf$chi2 <- round(invdf$chi2, 3)
-      invdf$delta.chi2 <- ifelse(
-        is.na(invdf$delta.chi2),
-        "",
-        round(invdf$delta.chi2, 3)
-      )
-      invdf$df <- as.integer(invdf$df)
-      invdf$delta.df <- ifelse(is.na(invdf$delta.df), "", invdf$delta.df)
-      invdf$pvalue <- format.pval(invdf$pvalue, digits = 3)
+      invdf$delta.chi2 <- round(invdf$delta.chi2, 3)
+      invdf$pvalue <- round(invdf$pvalue, 5)
       invdf$cfi <- round(invdf$cfi, 3)
       invdf$delta.cfi <- round(invdf$delta.cfi, 3)
       invdf$rmsea <- round(invdf$rmsea, 3)
       invdf$delta.rmsea <- round(invdf$delta.rmsea, 3)
 
-      # Add caption
+      # Optional: set caption
       attr(invdf, "caption") <- paste(
         "Measurement Invariance Analysis for",
         group_var
       )
-      # debbuging
-      jinfo("Measurement invariance results:")
+
+      jinfo(
+        "Measurement invariance results generated with",
+        nrow(invdf),
+        "models"
+      )
       jinfo(str(invdf))
       jinfo(head(invdf))
+
       return(invdf)
     },
 
