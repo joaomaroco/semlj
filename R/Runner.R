@@ -655,6 +655,7 @@ Runner <- R6::R6Class(
     ## Measurment Invariance Analysis : tryout by Joao Maroco :-(
 
     run_meas_invariance = function() {
+      jinfo("DEBUG: run_meas_invariance() — START")
       jinfo("Starting measurement invariance analysis...")
 
       # Check if multigroup is enabled

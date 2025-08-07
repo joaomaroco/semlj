@@ -276,15 +276,6 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         aSmartObj$spaceBy <- "model"
         ladd(private$.smartObjs) <- aSmartObj
 
-        ## Initialize SmartTable
-        aSmartObj <- SmartTable$new(
-          self$results$measInvariance$measInvarianceTable,
-          runner_machine
-        )
-        aSmartObj$activated <- self$options$measInvariance
-        aSmartObj$spaceBy <- "model"
-        ladd(private$.smartObjs) <- aSmartObj
-
         for (tab in private$.smartObjs) {
           tab$initTable()
         }
