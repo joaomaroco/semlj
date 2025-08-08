@@ -660,13 +660,17 @@ Runner <- R6::R6Class(
 
       # Check if multigroup is enabled
       multigroup_enabled <- isTRUE(self$options$multigroup)
+      jinfo(
+        "Measurement invariance enabled: multigroup_enabled=",
+        multigroup_enabled
+      )
 
       # Check if a group variable is selected
-      group_selected <- !is.null(self$multigroup) &&
-        !is.null(self$multigroup$var) &&
-        is.character(self$multigroup$var) &&
-        nzchar(trimws(self$multigroup$var))
-
+      group_selected <- !is.null(self$multigroup) && !is.null(self$multigroup$var) && is.character(self$multigroup$var) && nzchar(trimws(self$multigroup$var))
+      jinfo(
+        "Measurement invariance group selected: group_selected=",
+        group_selected
+      )
       if (!multigroup_enabled || !group_selected) {
         jinfo(
           "Measurement invariance skipped: multigroup_enabled=",
@@ -678,7 +682,7 @@ Runner <- R6::R6Class(
       }
 
       data <- private$.get_data()
-      group_var <- as.numeric(self$multigroup$var)
+      group_var <- self$multigroup$var
       model_syntax <- self$user_syntax
       estimator <- self$options$estimator
       likelihood <- self$options$likelihood

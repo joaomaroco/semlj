@@ -275,6 +275,8 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         aSmartObj$activated <- self$options$measInvariance
         aSmartObj$spaceBy <- "model"
         ladd(private$.smartObjs) <- aSmartObj
+        
+
 
         for (tab in private$.smartObjs) {
           tab$initTable()
@@ -314,16 +316,24 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         ### Run measurement invariance if requested
         if (self$options$measInvariance) {
           inv_result <- private$.runner_machine$run_meas_invariance()
-
-          # Ensure parent group exists
-          if (is.null(self$results$measInvariance)) {
-            self$results$measInvariance <- jmvcore::ResultsElement$new()
-          }
-          # Now safely assign data
-          if (!is.null(inv_result)) {
-            self$results$measInvariance$measInvarianceTable$inv_result
+          
+          if (!is.null(inv_result) && nrow(inv_result) > 0) {
+            tbl <- self$results$measInvariance$measInvarianceTable
+            
+            # Clear previous contents if re-running
+            tbl$clear()
+            
+            # Fill table row by row
+            for (i in seq_len(nrow(inv_result))) {
+              tbl$addRow(
+                rowKey = paste0("row", i),
+                values = as.list(inv_result[i, ])
+              )
+            }
           }
         }
+        
+        
 
         ### save predicted if needed
         private$.runner_machine$savePredRes(self$results, data)
@@ -438,12 +448,6 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
       .sourcifyOption = function(option) {
         return("")
-        # skip<-c("modelTerms","factors","covs","dep")
-        # defaults<-c(scaling="centered",contrasts="simple")
-        #
-        # if (option$name %in% skip)
-        #     return('')
-        # sourcifyOption(option,defaults)
       }
     )
   )
