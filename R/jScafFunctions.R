@@ -1,6 +1,13 @@
-j_DEBUG = FALSE
-j_INFO = FALSE
-t_INFO  <- F
+j_DEBUG = TRUE
+j_INFO = TRUE
+t_INFO  <- TRUE
+
+# Start logging to a file
+log_path <- "logs/scaffold_log.txt"
+dir.create("logs", showWarnings = T, recursive = TRUE)
+sink(log_path, append = T)
+
+# Now all cat(), print(), etc. from the above functions will go to the log file
 
 #### Helper functions used by Scaffold (not exported)
 

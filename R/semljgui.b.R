@@ -317,8 +317,13 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         if (self$options$measInvariance) {
           inv_result <- private$.runner_machine$run_meas_invariance()
           
+          mark(private$.runner_machine$run_meas_invariance())
+          mark(inv_result)
+          
           if (!is.null(inv_result) && nrow(inv_result) > 0) {
             tbl <- self$results$measInvariance$measInvarianceTable
+            
+            mark(tbl)
             
             # Clear previous contents if re-running
             tbl$clear()
