@@ -68,6 +68,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
+                    - measInvariance
                       ### modeloptions  ends
          
 
@@ -111,6 +112,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
+                    - measInvariance
                       ### modeloptions  ends
         columns:
           - name: label
@@ -167,6 +169,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
+                    - measInvariance
                       ### modeloptions  ends
         
         columns:
@@ -233,6 +236,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
+                    - measInvariance
                       ### modeloptions  ends
         columns:
           - name: type
@@ -298,6 +302,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
+                    - measInvariance
                       ### modeloptions  ends
 
         rows: 8
@@ -359,6 +364,7 @@ items:
                     - orthomax.gamma
                     - oblimin.gamma
                     - missing
+                    - measInvariance
                       ### modeloptions  ends
 
         columns:
@@ -1954,7 +1960,7 @@ items:
   - name: measInvariance
     title: "Measurement Invariance"
     type: Group   
-    visible: (measInvariance)
+    #visible: (multigroup & measInvariance)
     clearWith:
                       ### modeloptions  begins
                     - code

@@ -1,50 +1,166 @@
-j_DEBUG = TRUE
-j_INFO = TRUE
-t_INFO  <- TRUE
+# j_DEBUG <- FALSE
+# j_INFO  <- FALSE
+# t_INFO  <- FALSE
+# j_W0S   <- .Platform$OS.type=="windows"
+#
+# fleWOS<-""
+# # NB for Windows users: Feel free to change the path and name of the log file as you like.
+# if (j_W0S) fleWOS <- file.path(base::Sys.getenv("TEMP"), "jReshape.log")
+#
+# #### Helper functions for debugging
+#
+# tinfo <- function(...) {
+#     if (!t_INFO) return(invisible(NULL))
+#
+#     if (j_W0S && nzchar(fleWOS)) base::sink(file = fleWOS, append = TRUE)
+#
+#     cat(paste(list(...)))
+#     cat("\n")
+#
+#     if (j_W0S && nzchar(fleWOS)) base::sink()
+# }
+#
+# jinfo <- function(...) {
+#     if (!j_INFO) return(invisible(NULL))
+#
+#     if (j_W0S && nzchar(fleWOS)) base::sink(file = fleWOS, append = TRUE)
+#
+#     cat("\n")
+#     cat(paste(list(...)))
+#     cat("\n")
+#
+#     if (j_W0S && nzchar(fleWOS)) base::sink()
+# }
+#
+# mark <- function(...) {
+#     if (!j_DEBUG) return(invisible(NULL))
+#
+#     if (j_W0S && nzchar(fleWOS)) base::sink(file = fleWOS, append = TRUE)
+#
+#     if (missing(...)) {
+#         cat("Mark here\n")
+#         return(invisible(NULL))
+#     }
+#
+#     items <- list(...)
+#     cat("______begin________\n\n")
+#     for (a in items)
+#         if (is.character(a)) cat(a, "\n") else print(a)
+#     cat("_____end_______\n\n")
+#
+#     if (j_W0S && nzchar(fleWOS)) base::sink()
+# }
 
-# Start logging to a file
-log_path <- "logs/scaffold_log.txt"
-dir.create("logs", showWarnings = T, recursive = TRUE)
-sink(log_path, append = T)
 
-# Now all cat(), print(), etc. from the above functions will go to the log file
+# Define global environment for log flags
+logFlags            <- new.env(parent = emptyenv())
+logFlags$j_DEBUG    <- TRUE
+logFlags$j_INFO     <- TRUE
+logFlags$log_active <- TRUE  # Tracks if the log file is currently open
+logFlags$j_OS       <- .Platform$OS.type
 
-#### Helper functions used by Scaffold (not exported)
+# Determine the appropriate log file path based on the OS
+logFlags$fleWUD <- switch(logFlags$j_OS,
+                          "windows" = file.path(base::Sys.getenv("TEMP"), "semlj_jm.log"),
+                          "unix" = file.path(Sys.getenv("HOME"), ".local", "share", "jamovi", "jreshape.log"),
+                          "darwin" = file.path(Sys.getenv("HOME"), "Library", "Logs", "jamovi", "jreshape.log"),
+                          file.path(tempdir(), "jreshape.log")  # Default to tempdir() if OS is unrecognized
+)
 
-tinfo <- function(...) {
-  if (t_INFO) {
-    cat(paste(list(...)))
-    cat("\n")
+# Ensure the log directory exists
+ensure_log_dir <- function(log_path) {
+  log_dir <- dirname(log_path)
+  if (!dir.exists(log_dir)) {
+    tryCatch({
+      dir.create(log_dir, recursive = TRUE, showWarnings = FALSE)
+    }, error = function(e) {
+      # Handle errors silently
+    })
   }
 }
 
+# Helper function to get current timestamp
+current_time <- function() {
+  format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+}
 
+# Update logging flags dynamically
+set_logflags <- function(jlog) {
+  if (jlog && !logFlags$log_active) {
+    open_log()  # Open the log only if it is not already active
+  } else if (!jlog && logFlags$log_active) {
+    close_log()  # Close the log only if it is currently active
+  }
+  
+  logFlags$j_DEBUG <- jlog
+  logFlags$j_INFO  <- jlog
+}
+
+# Open the log file if not already open
+open_log <- function() {
+  ensure_log_dir(logFlags$fleWUD)
+  if (nzchar(logFlags$fleWUD) && !logFlags$log_active) {
+    tryCatch({
+      if (!file.exists(logFlags$fleWUD)) file.create(logFlags$fleWUD)
+      cat(paste0("Logging started at  ",
+                 current_time(),
+                 "\n---------------------------------------\n"),
+          file = logFlags$fleWUD, append = TRUE)
+      logFlags$log_active <- TRUE
+    }, error = function(e) {
+      # Optional: Handle errors silently
+    })
+  }
+}
+
+# Close the log file
+close_log <- function() {
+  if (nzchar(logFlags$fleWUD) && logFlags$log_active) {
+    tryCatch({
+      cat(paste0("---------------------------------------\n",
+                 "Logging disabled at ", current_time(), "\n\n"),
+          file = logFlags$fleWUD, append = TRUE)
+      logFlags$log_active <- FALSE
+    }, error = function(e) {
+      # Optional: Handle errors silently
+    })
+  }
+}
+
+# Write info messages to the log
 jinfo <- function(...) {
-  if (j_INFO) {
-    cat("\n")
-    cat(paste(list(...)))
-    cat("\n")
-  }
+  if (!logFlags$j_INFO || !logFlags$log_active) return(invisible(NULL))
+  tryCatch({
+    if (nzchar(logFlags$fleWUD)) {
+      if (!file.exists(logFlags$fleWUD)) file.create(logFlags$fleWUD)
+      cat(paste(..., collapse = " "), "\n",
+          file = logFlags$fleWUD, append = TRUE)
+    }
+  }, error = function(e) {
+    # Optional: Log the error internally
+  })
 }
 
-
-
+# Write debug marks to the log
 mark <- function(...) {
-  if (!j_DEBUG) 
-    return()
-  
-  if (missing(...))
-    cat("Mark here\n")
-  items<-list(...)
-  
-  if (length(items)>1)  cat("______begin________\n\n")
-  for (a in items)
-    if (is.character(a))
-      cat(a,"\n")
-  else
-    print(a)
-  if (length(items)>1)  cat("_____end_______\n\n")
-  
+  if (!logFlags$j_DEBUG || !logFlags$log_active) return(invisible(NULL))
+  tryCatch({
+    if (nzchar(logFlags$fleWUD)) {
+      if (!file.exists(logFlags$fleWUD)) file.create(logFlags$fleWUD)
+      cat("______begin________\n", file = logFlags$fleWUD, append = TRUE)
+      lapply(list(...), function(a) {
+        if (is.character(a)) {
+          cat(a, "\n", file = logFlags$fleWUD, append = TRUE)
+        } else {
+          cat(paste(capture.output(print(a)), collapse = "\n"), "\n",
+              file = logFlags$fleWUD, append = TRUE)
+        }
+      })
+      cat("_______end_________\n", file = logFlags$fleWUD, append = TRUE)
+    }
+  }, error = function(e) {
+    # Optional: Log the error internally
+  })
 }
 
 is.something <- function(x, ...) UseMethod(".is.something")
@@ -74,7 +190,7 @@ try_hard<-function(exp,max_warn=5) {
       NULL
     }), warning=function(w) {
       
-      if (length(.results$warning)==max_warn) 
+      if (length(.results$warning)==max_warn)
         .results$warning[[length(.results$warning)+1]]<<-"Additional warnings are present."
       
       if (length(.results$warning)<max_warn)
@@ -124,23 +240,23 @@ sourcifyOption<- function(x,...) UseMethod(".sourcifyOption")
 .sourcifyOption.OptionVariables<-function(option,def=NULL) {
   
   if (is.null(option$value))
-     return('')
+    return('')
   
   values<-sourcifyName(option$value)
   
   if (length(values)==1)
-     return(paste0(option$name,"=",values))
+    return(paste0(option$name,"=",values))
   else
     return(paste0(option$name,"=c(",paste0(values,collapse = ","),")"))
 }
-  
+
 .sourcifyOption.OptionTerms<-function(option,def=NULL)
-     .sourcifyOption.default(option,def)
-  
+  .sourcifyOption.default(option,def)
+
 .sourcifyOption.OptionArray<-function(option,def=NULL) {
   alist<-option$value
   if (length(alist)==0)
-      return('')
+    return('')
   if (is.something(def) & option$name %in% names(def)) {
     test<-all(sapply(alist,function(a) a$type)==def[[option$name]])
     if (test)
@@ -155,7 +271,7 @@ sourcifyOption<- function(x,...) UseMethod(".sourcifyOption")
   if (length(option$value)==0)
     return('')
   if (option$value==option$default)
-       return('')
+    return('')
   paste0(option$name,"='",option$value,"'")
 }
 
@@ -178,10 +294,10 @@ listify <- function(adata) {
   res <- lapply(1:dim(adata)[1], function(a) as.list(adata[a, ]))
   names(res) <- rownames(adata)
   res
-}            
+}
 
 smartTableName<-function(root,alist,end=NULL) {
-    paste(root,make.names(paste(alist,collapse = ".")),end,sep="_")
+  paste(root,make.names(paste(alist,collapse = ".")),end,sep="_")
 }
 
 
@@ -194,8 +310,8 @@ transnames<-function(original,ref) {
 
 is.listOfList<-function(obj) {
   if (length(obj)==0)
-     return(FALSE)
-   
+    return(FALSE)
+  
   if (inherits(obj,"list")) {
     child<-obj[[1]]
     return(inherits(obj,"list"))
@@ -221,14 +337,14 @@ ebind_square<-function(...) {
   tabs<-list(...)
   .names<-unique(unlist(sapply(tabs,colnames)))
   .max<-max(unlist(sapply(tabs,dim)))
- 
+  
   tabs<-lapply(tabs, function(atab) {
     atab<-as.data.frame(atab)
-    for (name in .names) 
+    for (name in .names)
       if (!utils::hasName(atab,name))
         atab[[name]]<-NA
     if (dim(atab)[1]<.max)
-        atab[(dim(atab)[1]+1):.max,]<-NA
+      atab[(dim(atab)[1]+1):.max,]<-NA
     atab
   })
   return(do.call(rbind,tabs))

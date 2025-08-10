@@ -693,7 +693,16 @@ options:
             constrain the (residual) covariances of the latent variables to be equal across groups (when conducting multi-group analyses)
           R: >
             `TRUE` or `FALSE` (default), constrain the (residual) covariances of the latent variables to be equal across groups (when conducting multi-group analyses)
-
+ ## Measurment invariance
+    - name: measInvariance
+      type: Bool
+      title: "Measurement invariance"
+      default: false
+      description:
+          ui: >
+            Test for measurement invariance across groups (configural, metric, scalar, strict)
+          R: >
+            Test for measurement invariance across groups (configural, metric, scalar, strict)
 
 #### Exploratory ESEM options ==============================================
 
@@ -1181,14 +1190,4 @@ options:
            @predict, and the implementation is adpted from
            [github SEMpredict](https://github.com/mjderooij/SEMpredict)
  
-## Measurment invariance
-    - name: measInvariance
-      type: Bool
-      title: "Measurement invariance"
-      default: false
-      description:
-          ui: >
-            Test for measurement invariance across groups (configural, metric, scalar, strict)
-          R: >
-            Test for measurement invariance across groups (configural, metric, scalar, strict)
 ...

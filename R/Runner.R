@@ -659,7 +659,7 @@ Runner <- R6::R6Class(
       jinfo("Starting measurement invariance analysis...")
 
       # Check if multigroup is enabled
-      multigroup_enabled <- isTRUE(self$options$multigroup)
+      multigroup_enabled <- isTRUE(self$multigroup)
       jinfo(
         "Measurement invariance enabled: multigroup_enabled=",
         multigroup_enabled
@@ -671,7 +671,8 @@ Runner <- R6::R6Class(
         "Measurement invariance group selected: group_selected=",
         group_selected
       )
-      if (!multigroup_enabled || !group_selected) {
+      #if (!multigroup_enabled || !group_selected) {
+        if ( !group_selected) {  
         jinfo(
           "Measurement invariance skipped: multigroup_enabled=",
           multigroup_enabled,
