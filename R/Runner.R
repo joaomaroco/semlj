@@ -938,8 +938,10 @@ Runner <- R6::R6Class(
       )
       jinfo(str(invdf))
       jinfo(head(invdf))
+      
+      jinfo("Measurement invariance results:")
+      print(invdf)
 
-      cat(invdf)
       return(invdf)
     },
 
