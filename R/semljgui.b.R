@@ -266,6 +266,9 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         if (is.null(self$results$measInvariance)) {
           self$results$measInvariance <- jmvcore::ResultsElement$new()
         }
+        if (is.null(self$results$measInvariance$measInvarianceTable)) {
+          self$results$measInvariance$measInvarianceTable <- jmvcore::ResultsTable$new()
+        }
 
         ## Measurement invariance table ###
         aSmartObj <- SmartTable$new(
@@ -315,23 +318,18 @@ semljguiClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
         ### Run measurement invariance if requested
         if (self$options$measInvariance) {
-          inv_result <- self$run_meas_invariance()
-          
+          inv_result <- private$.runner_machine$run_meas_invariance()
           
           if (!is.null(inv_result) && nrow(inv_result) > 0) {
+            # Ensure table exists
+            if (is.null(self$results$measInvariance$measInvarianceTable)) {
+              self$results$measInvariance$measInvarianceTable <- jmvcore::ResultsTable$new()
+            }
             tbl <- self$results$measInvariance$measInvarianceTable
-            
-            jinfo("Measurement invariance results:", nrow(inv_result), "rows")
-            
-            # Clear previous contents if re-running
             tbl$clear()
             
-            # Fill table row by row
             for (i in seq_len(nrow(inv_result))) {
-              tbl$addRow(
-                rowKey = paste0("row", i),
-                values = as.list(inv_result[i, ])
-              )
+              tbl$addRow(rowKey = paste0("row", i), values = as.list(inv_result[i, ]))
             }
           }
         }

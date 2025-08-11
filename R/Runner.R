@@ -936,12 +936,10 @@ Runner <- R6::R6Class(
         nrow(invdf),
         "models"
       )
+      jinfo("Measurement invariance results:")
       jinfo(str(invdf))
       jinfo(head(invdf))
       
-      jinfo("Measurement invariance results:")
-      print(invdf)
-
       return(invdf)
     },
 
